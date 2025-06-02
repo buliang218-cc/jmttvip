@@ -1,0 +1,34 @@
+name: Check and Release JMComic APK
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # 每 6 小时执行一次
+  workflow_dispatch:       # 也支持手动触发
+
+jobs:
+  update-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -U requests
+
+      - name: Run main script
+        run: python main.py
+
+      - name: Upload APK to Release (if updated)
+        uses: softprops/action-gh-release@v1
+        if: success()
+        with:
+          files: jmcomic_latest.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
